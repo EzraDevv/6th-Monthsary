@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>For My Wife 🤍</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Poppins',sans-serif;
+
+    background:linear-gradient(
+        -45deg,
+        #ffd6e0,
+        #fff0f5,
+        #e8f4ff,
+        #ffe8d6
+    );
+
+    background-size:400% 400%;
+    animation:bgMove 12s ease infinite;
+}
+
+@keyframes bgMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+.container{
+    width:100%;
+    max-width:430px;
+    padding:35px;
+    text-align:center;
+    z-index:2;
+}
+
+.music-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+
+    width:70px;
+    height:70px;
+
+    padding:0;
+    border:none;
+    background:transparent; /* remove gray circle */
+
+    cursor:pointer;
+    z-index:9999;
+
+    transition:.3s ease;
+}
+
+.music-btn img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+}
+
+.music-btn:hover{
+    transform:scale(1.08);
+}
+
+.music-btn img{
+    width:42px;
+    height:42px;
+    object-fit:contain;
+    user-select:none;
+    pointer-events:none;
+}
+
+.music-btn.active img{
+    animation:musicFloat 2s ease-in-out infinite;
+}
+
+@keyframes musicFloat{
+    0%,100%{
+        transform:translateY(0);
+    }
+    50%{
+        transform:translateY(-4px);
+    }
+}
+
+@keyframes pulseMusic{
+    0%{
+        transform:scale(1);
+    }
+    50%{
+        transform:scale(1.12);
+    }
+    100%{
+        transform:scale(1);
+    }
+}
+
+.message{
+    font-family:'Cormorant Garamond', serif;
+    font-size:2.7rem;
+    font-weight:500;
+    line-height:1.25;
+    color:#444;
+
+    min-height:240px;
+
+    opacity:0;
+    transform:translateY(30px);
+    transition:all 1.3s ease;
+}
+
+.message.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.final{
+    color:#ff4f81;
+}
+
+/* Floating Hearts */
+
+.hearts{
+    position:absolute;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    pointer-events:none;
+}
+
+.hearts span{
+    position:absolute;
+    bottom:-100px;
+    color:rgba(255,255,255,0.7);
+    font-size:20px;
+    animation:float 12s linear infinite;
+}
+
+@keyframes float{
+    from{
+        transform:translateY(0) rotate(0deg);
+        opacity:0;
+    }
+
+    10%{
+        opacity:1;
+    }
+
+    to{
+        transform:translateY(-120vh) rotate(360deg);
+        opacity:0;
+    }
+}
+</style>
+</head>
+<body>
+
+<button id="musicBtn" class="music-btn">
+    <img
+        id="musicIcon"
+        src="assets/img/5776bb3b8f4ccdf7adeb5aff6b01ce07.jpg"
+        alt="Music Toggle"
+    >
+</button>
+
+<audio id="bgMusic" autoplay playsinline>
+    <source src="assets/Rico Blanco - Your Universe (LyricsLetra).mp3" type="audio/mpeg">
+</audio>
+
+<div class="hearts">
+    <span style="left:10%;animation-delay:0s;">🤍</span>
+    <span style="left:25%;animation-delay:2s;">🤍</span>
+    <span style="left:40%;animation-delay:5s;">🤍</span>
+    <span style="left:60%;animation-delay:1s;">🤍</span>
+    <span style="left:75%;animation-delay:4s;">🤍</span>
+    <span style="left:90%;animation-delay:7s;">🤍</span>
+</div>
+
+<div class="container">
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+
+const musicBtn = document.getElementById("musicBtn");
+const musicIcon = document.getElementById("musicIcon");
+const bgMusic = document.getElementById("bgMusic");
+
+let isPlaying = false;
+
+window.addEventListener("load", () => {
+    bgMusic.volume = 0.7;
+
+    const playPromise = bgMusic.play();
+
+    if (playPromise !== undefined) {
+        playPromise.catch(() => {
+            console.log("Autoplay blocked by browser");
+        });
+    }
+});
+
+musicBtn.addEventListener("click", () => {
+
+    if(!isPlaying){
+
+        bgMusic.play();
+
+        musicIcon.src = "assets/img/5776bb3b8f4ccdf7adeb5aff6b01ce07.jpg";
+
+        musicBtn.classList.add("active");
+
+        isPlaying = true;
+
+    }else{
+
+        bgMusic.pause();
+
+        musicIcon.src = "assets/img/5776bb3b8f4ccdf7adeb5aff6b01ce07.jpg";
+
+        musicBtn.classList.remove("active");
+
+        isPlaying = false;
+    }
+
+});
+
+const messages = [
+
+"Hello my Wifee hehe 🤍",
+
+"Wait...",
+
+"Before you continue...",
+
+"Are you sure you're ready for this? 👀",
+
+"Because I have something important to tell you...",
+
+"Question first.",
+
+"Who's the prettiest wife in the world?",
+
+"Think carefully...",
+
+"Wrong.",
+
+"It's you.",
+
+"Always you. 🤍",
+
+"Okay okay...",
+
+"Serious na.",
+
+"I made this little surprise just for you.",
+
+"Because there are things I never get tired of telling you.",
+
+"Thank you for being my safe place.",
+
+"My best friend.",
+
+"My favorite notification.",
+
+"My favorite person.",
+
+"The one I want to share every ordinary day with.",
+
+"You make simple moments feel special.",
+
+"You make difficult days feel lighter.",
+
+"And somehow...",
+
+"You make life feel warmer.",
+
+"If I could choose again...",
+
+"I would still choose you.",
+
+"Every single time.",
+
+"Without hesitation.",
+
+"Without doubt.",
+
+"Just you. 🤍",
+
+"You are my home.",
+
+"My comfort.",
+
+"My favorite person.",
+
+"The one I want to spend forever with.",
+
+"And that's why...",
+
+"I need to confess something...",
+
+"Sometimes...",
+
+"When you're sleeping...",
+
+"I stare at you.",
+
+"Not because I'm being romantic.",
+
+"I'm checking if you're still angry at me. 😭",
+
+"Because honestly...",
+
+"I can never tell. 😂",
+
+"Or maybe...",
+
+"I have one complaint.",
+
+"You stole something from me.",
+
+"My heart? ❌",
+
+"My side of the bed? 😌",
+
+"Only when you come over...",
+
+"and then you say it's too hot 😭",
+
+"So I end up respecting your 'no cuddle zone' policy 😂",
+
+"But if I'm being honest...",
+
+"You can have the bed.",
+
+"You can have my fries.",
+
+"You can have everything.",
+
+"Because having you...",
+
+"Is the best thing that ever happened to me. 🤍",
+
+"So this wasn't really a confession.",
+
+"It was a reminder.",
+
+"That no matter how many days pass...",
+
+"No matter how many silly arguments we have...",
+
+"Happy 6th Monthsaryy Babyy",
+
+"I love you more than words can explain, Always and forever. 🤍",
+
+"- Your Bechang 🤍"
+
+
+];
+
+const text = document.getElementById("message");
+
+let index = 0;
+
+function showMessage() {
+
+    text.classList.remove("show");
+
+    setTimeout(() => {
+
+        text.innerHTML = messages[index];
+
+        if(index >= messages.length - 3){
+            text.classList.add("final");
+        }
+
+        text.classList.add("show");
+
+        index++;
+
+        if(index < messages.length){
+
+            let duration = 2800;
+
+            if(
+                messages[index - 1].includes("confess") ||
+                messages[index - 1].includes("Sometimes") ||
+                messages[index - 1].includes("stare at you") ||
+                messages[index - 1].includes("complaint") ||
+                messages[index - 1].includes("monthsaryy") 
+            ){
+                duration = 4200;
+            }
+
+            setTimeout(showMessage, duration);
+        }
+
+    }, 700);
+}
+
+showMessage();
+
+</script>
+
+</body>
+</html>
