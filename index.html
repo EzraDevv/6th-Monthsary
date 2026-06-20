@@ -396,7 +396,7 @@ function showMessage() {
 
         if(index < messages.length){
 
-            let duration = 2800;
+            let duration = 3800;
 
             if(
                 messages[index - 1].includes("confess") ||
@@ -405,7 +405,7 @@ function showMessage() {
                 messages[index - 1].includes("complaint") ||
                 messages[index - 1].includes("monthsaryy") 
             ){
-                duration = 4200;
+                duration = 5200;
             }
 
             setTimeout(showMessage, duration);
