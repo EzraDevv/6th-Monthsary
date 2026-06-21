@@ -1,0 +1,42 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Fredoka',sans-serif;
+    touch-action:manipulation;
+
+    background:linear-gradient(
+        -45deg,
+        #ffd6e0,
+        #fff0f5,
+        #e8f4ff,
+        #ffe8d6
+    );
+
+    background:
+    radial-gradient(circle at top left,#ffdce8,#fff5f8 35%),
+    radial-gradient(circle at bottom right,#ffe9f2,#fffafc 40%);
+
+    background-size:400% 400%;
+    animation:bgMove 12s ease infinite;
+}
+
+button{
+    -webkit-tap-highlight-color:transparent;
+}
+
+.container{
+    width:100%;
+    max-width:430px;
+    padding:35px;
+    text-align:center;
+    z-index:2;
+}
