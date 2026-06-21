@@ -1,313 +1,583 @@
-‎<!DOCTYPE html>
-‎<html lang="en">
-‎<head>
-‎<meta charset="UTF-8">
-‎<meta name="viewport" content="width=device-width, initial-scale=1.0">
-‎<title>For My Wife 🤍</title>
-‎
-‎<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
-‎
-‎<style>
-‎*{
-‎    margin:0;
-‎    padding:0;
-‎    box-sizing:border-box;
-‎}
-‎
-‎body{
-‎    min-height:100dvh;
-‎    overflow:hidden;
-‎    display:flex;
-‎    justify-content:center;
-‎    align-items:center;
-‎
-‎    font-family:'Poppins',sans-serif;
-‎
-‎    background:linear-gradient(-45deg,#ffd1dc,#fff4f8,#ffe8ef,#fef6ff);
-‎    background-size:400% 400%;
-‎    animation:bgMove 15s ease infinite;
-‎}
-‎
-‎@keyframes bgMove{
-‎    0%{background-position:0% 50%;}
-‎    50%{background-position:100% 50%;}
-‎    100%{background-position:0% 50%;}
-‎}
-‎
-‎/* glowing blobs */
-‎.blob{
-‎    position:absolute;
-‎    border-radius:50%;
-‎    filter:blur(80px);
-‎    opacity:.4;
-‎    z-index:0;
-‎}
-‎
-‎.blob1{
-‎    width:320px;
-‎    height:320px;
-‎    background:#ffb6c9;
-‎    top:-80px;
-‎    left:-80px;
-‎}
-‎
-‎.blob2{
-‎    width:280px;
-‎    height:280px;
-‎    background:#ffd6f3;
-‎    bottom:-80px;
-‎    right:-80px;
-‎}
-‎
-‎/* container */
-‎.container{
-‎    position:relative;
-‎    z-index:2;
-‎
-‎    width:90%;
-‎    max-width:550px;
-‎
-‎    padding:50px 40px;
-‎
-‎    border-radius:40px;
-‎
-‎    background:rgba(255,255,255,.25);
-‎    backdrop-filter:blur(20px);
-‎    -webkit-backdrop-filter:blur(20px);
-‎
-‎    border:1px solid rgba(255,255,255,.4);
-‎
-‎    box-shadow:
-‎        0 20px 60px rgba(255,105,135,.18),
-‎        0 0 60px rgba(255,255,255,.25);
-‎
-‎    text-align:center;
-‎    transition:.4s ease;
-‎}
-‎
-‎.container:hover{
-‎    transform:translateY(-5px);
-‎}
-‎
-‎/* message text */
-‎.message{
-‎    font-family:'Cormorant Garamond',serif;
-‎    font-size:2.5rem;
-‎    line-height:1.4;
-‎    color:#444;
-‎
-‎    min-height:260px;
-‎
-‎    opacity:0;
-‎    transform:translateY(35px);
-‎
-‎    transition:all 1.2s ease;
-‎}
-‎
-‎.message.show{
-‎    opacity:1;
-‎    transform:translateY(0);
-‎}
-‎
-‎.final{
-‎    color:#ff4f81;
-‎    text-shadow:0 0 20px rgba(255,79,129,.25);
-‎}
-‎
-‎/* signature */
-‎.signature{
-‎    margin-top:20px;
-‎    font-family:'Great Vibes',cursive;
-‎    font-size:2.2rem;
-‎    color:#ff5f8c;
-‎}
-‎
-‎/* music button */
-‎.music-btn{
-‎    position:fixed;
-‎    top:20px;
-‎    left:20px;
-‎
-‎    width:70px;
-‎    height:70px;
-‎
-‎    border:none;
-‎    background:none;
-‎    cursor:pointer;
-‎    z-index:999;
-‎}
-‎
-‎.music-btn img{
-‎    width:100%;
-‎    height:100%;
-‎    object-fit:contain;
-‎    transition:.4s ease;
-‎}
-‎
-‎.music-btn:hover img{
-‎    transform:scale(1.1);
-‎}
-‎
-‎.music-btn.active img{
-‎    animation:musicFloat 2s ease-in-out infinite;
-‎}
-‎
-‎@keyframes musicFloat{
-‎    0%,100%{transform:translateY(0);}
-‎    50%{transform:translateY(-6px);}
-‎}
-‎
-‎/* hearts */
-‎.hearts{
-‎    position:absolute;
-‎    width:100%;
-‎    height:100%;
-‎    overflow:hidden;
-‎    pointer-events:none;
-‎}
-‎
-‎.hearts span{
-‎    position:absolute;
-‎    bottom:-100px;
-‎    font-size:22px;
-‎    color:rgba(255,255,255,.9);
-‎    animation:floatHeart 14s linear infinite;
-‎}
-‎
-‎@keyframes floatHeart{
-‎    0%{
-‎        transform:translateY(0) rotate(0deg) scale(.8);
-‎        opacity:0;
-‎    }
-‎    20%{opacity:1;}
-‎    100%{
-‎        transform:translateY(-130vh) rotate(360deg) scale(1.4);
-‎        opacity:0;
-‎    }
-‎}
-‎</style>
-‎</head>
-‎
-‎<body>
-‎
-‎<div class="blob blob1"></div>
-‎<div class="blob blob2"></div>
-‎
-‎<button id="musicBtn" class="music-btn">
-‎    <img id="musicIcon" src="assets/img/5776bb3b8f4ccdf7adeb5aff6b01ce07.jpg">
-‎</button>
-‎
-‎<audio id="bgMusic" autoplay playsinline>
-‎    <source src="assets/Rico Blanco - Your Universe (LyricsLetra).mp3" type="audio/mpeg">
-‎</audio>
-‎
-‎<div class="hearts">
-‎    <span style="left:10%;animation-delay:0s;">🤍</span>
-‎    <span style="left:25%;animation-delay:2s;">🤍</span>
-‎    <span style="left:40%;animation-delay:4s;">🤍</span>
-‎    <span style="left:60%;animation-delay:1s;">🤍</span>
-‎    <span style="left:75%;animation-delay:3s;">🤍</span>
-‎    <span style="left:90%;animation-delay:5s;">🤍</span>
-‎</div>
-‎
-‎<div class="container">
-‎    <div id="message" class="message"></div>
-‎</div>
-‎
-‎<script>
-‎const musicBtn = document.getElementById("musicBtn");
-‎const bgMusic = document.getElementById("bgMusic");
-‎const text = document.getElementById("message");
-‎
-‎let index = 0;
-‎let isPlaying = false;
-‎
-‎const messages = [
-‎"Hello my Wifee hehe 🤍",
-‎"Wait...",
-‎"Before you continue...",
-‎"Are you sure you're ready for this? 👀",
-‎"Because I have something important to tell you...",
-‎"Question first.",
-‎"Who's the prettiest wife in the world?",
-‎"Think carefully...",
-‎"Wrong.",
-‎"It's you.",
-‎"Always you. 🤍",
-‎"Okay okay...",
-‎"Serious na.",
-‎"I made this little surprise just for you.",
-‎"Because there are things I never get tired of telling you.",
-‎"Thank you for being my safe place.",
-‎"My best friend.",
-‎"My favorite person.",
-‎"You make life feel warmer.",
-‎"If I could choose again...",
-‎"I would still choose you.",
-‎"Every single time.",
-‎"Without hesitation.",
-‎"Without doubt.",
-‎"Just you. 🤍",
-‎"You are my home.",
-‎"My comfort.",
-‎"My forever.",
-‎"And that's why...",
-‎"Happy 6th Monthsary Baby 🤍",
-‎"I love you always and forever.",
-‎"- Your Bechang 🤍"
-‎];
-‎
-‎window.addEventListener("load", () => {
-‎    bgMusic.volume = 0.7;
-‎
-‎    bgMusic.play().then(() => {
-‎        isPlaying = true;
-‎        musicBtn.classList.add("active");
-‎    }).catch(() => {});
-‎});
-‎
-‎musicBtn.addEventListener("click", () => {
-‎    if(bgMusic.paused){
-‎        bgMusic.play();
-‎    }else{
-‎        bgMusic.pause();
-‎    }
-‎});
-‎
-‎bgMusic.addEventListener("play", () => {
-‎    musicBtn.classList.add("active");
-‎});
-‎
-‎bgMusic.addEventListener("pause", () => {
-‎    musicBtn.classList.remove("active");
-‎});
-‎
-‎const songDuration = 237;
-‎const messageDuration =
-‎((songDuration * 1000) - (700 * messages.length)) / messages.length;
-‎
-‎function showMessage(){
-‎    text.classList.remove("show");
-‎
-‎    setTimeout(() => {
-‎        text.innerHTML = messages[index];
-‎
-‎        if(index >= messages.length - 3){
-‎            text.classList.add("final");
-‎        }
-‎
-‎        text.classList.add("show");
-‎        index++;
-‎
-‎        if(index < messages.length){
-‎            setTimeout(showMessage, messageDuration);
-‎        }
-‎
-‎    }, 700);
-‎}
-‎
-‎showMessage();
-‎</script>
-‎
-‎</body>
-‎</html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>6th Monthsaryy</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:'Fredoka',sans-serif;
+    touch-action: manipulation;
+
+    background:linear-gradient(
+        -45deg,
+        #ffd6e0,
+        #fff0f5,
+        #e8f4ff,
+        #ffe8d6
+    );
+
+    background: radial-gradient(circle at top left,#ffdce8,#fff5f8 35%), radial-gradient(circle at bottom right,#ffe9f2,#fffafc 40%);
+
+    background-size:400% 400%;
+    animation:bgMove 12s ease infinite;
+}
+
+@keyframes bgMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+/* INTRO SCREEN */
+
+.intro-screen{
+    position:fixed;
+    inset:0;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(12px);
+
+    z-index:10000;
+
+    transition:1s ease;
+}
+
+.intro-screen.hide{
+    opacity:0;
+    visibility:hidden;
+}
+
+.intro-card{
+width:90%;
+max-width:360px;
+
+padding:40px 30px;
+
+border-radius:40px;
+
+background:#fff8fb;
+
+border:4px solid #ffe0eb;
+
+box-shadow:
+0 15px 35px rgba(255,170,195,.25),
+inset 0 4px 0 rgba(255,255,255,.9);
+
+text-align:center;
+
+animation:bounceCard 3s ease-in-out infinite;
+
+}
+
+button{
+    -webkit-tap-highlight-color: transparent;
+}
+
+.sparkles{
+    font-size:2rem;
+    margin-bottom:10px;
+    animation:sparkle 2s infinite;
+}
+
+.intro-card h1{
+font-family:'Pacifico',cursive;
+font-size:2.2rem;
+color:#ff7ba7;
+margin-bottom:12px;
+}
+
+.intro-card p{
+font-size:.95rem;
+color:#8d6a75;
+line-height:1.6;
+}
+
+#startBtn{
+margin-top:20px;
+
+border:none;
+
+background:#ff9fc1;
+
+color:white;
+
+padding:15px 40px;
+
+border-radius:999px;
+
+font-family:'Fredoka',sans-serif;
+font-size:1rem;
+font-weight:600;
+
+cursor:pointer;
+
+box-shadow:
+0 8px 0 #ff85af,
+0 15px 25px rgba(255,133,175,.3);
+
+transition:.2s ease;
+
+}
+
+
+#startBtn:hover{
+    transform:translateY(-3px) scale(1.05);
+}
+
+#startBtn:active{
+    transform:scale(.95);
+}
+
+.sparkles{
+font-size:2rem;
+letter-spacing:8px;
+margin-bottom:15px;
+}
+
+@keyframes floatCard{
+    0%,100%{
+        transform:translateY(0);
+    }
+    50%{
+        transform:translateY(-10px);
+    }
+}
+
+@keyframes sparkle{
+    0%,100%{
+        transform:scale(1);
+    }
+    50%{
+        transform:scale(1.2);
+    }
+}
+
+/* MAIN CONTENT */
+
+.container{
+    width:100%;
+    max-width:430px;
+    padding:35px;
+    text-align:center;
+    z-index:2;
+}
+
+.music-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+
+    width:70px;
+    height:70px;
+
+    border:none;
+    background:transparent;
+
+    cursor:pointer;
+    z-index:9999;
+
+    transition:.3s ease;
+}
+
+.music-btn img{
+    width:42px;
+    height:42px;
+    object-fit:contain;
+    pointer-events:none;
+}
+
+.music-btn:hover{
+    transform:scale(1.08);
+}
+
+.music-btn.active img{
+    animation:musicFloat 2s ease-in-out infinite;
+}
+
+@keyframes musicFloat{
+    0%,100%{
+        transform:translateY(0);
+    }
+    50%{
+        transform:translateY(-4px);
+    }
+}
+
+.message{
+    font-family:'Pacifico',cursive;
+    font-size:2.8rem;
+    font-weight:500;
+    line-height:1.25;
+
+    color:#ff709f;
+
+    min-height:240px;
+
+    opacity:0;
+    transform:translateY(30px);
+
+    transition:all 1.3s ease;
+    text-shadow: 0 4px 10px rgba(255,170,195,.3);
+}
+
+.message.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.final{
+    color:#ff4f81;
+}
+
+/* HEARTS */
+
+.hearts{
+    position:absolute;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    pointer-events:none;
+}
+
+.hearts span{
+    position:absolute;
+    bottom:-100px;
+
+    color:rgba(255,255,255,.75);
+
+    font-size:26px;
+
+    animation:float 12s linear infinite;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,.8));
+}
+
+@keyframes float{
+
+    from{
+        transform:translateY(0) rotate(0deg);
+        opacity:0;
+    }
+
+    10%{
+        opacity:1;
+    }
+
+    to{
+        transform:translateY(-120vh) rotate(360deg);
+        opacity:0;
+    }
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+<!-- INTRO -->
+
+<div id="introScreen" class="intro-screen">
+
+
+<div class="intro-card">
+
+    <div class="sparkles">🎀🎀🎀</div>
+
+    <h1>Happy 6th Monthsary</h1>
+
+    <p>I prepared something special for you 🌸</p>
+
+    <button id="startBtn">
+        Start
+    </button>
+
+</div>
+
+
+</div>
+
+<!-- MUSIC BUTTON -->
+
+<button id="musicBtn" class="music-btn">
+    <img
+        id="musicIcon"
+        src="assets/img/giphy (2).gif"
+        alt="Music Toggle"
+    >
+</button>
+
+<audio id="bgMusic" playsinline>
+    <source src="assets/Rico Blanco - Your Universe (LyricsLetra).mp3" type="audio/mpeg">
+</audio>
+
+<!-- HEARTS -->
+
+<div class="hearts">
+    <span style="left:10%;animation-delay:0s;">🌸</span>
+    <span style="left:25%;animation-delay:2s;">🌸</span>
+    <span style="left:40%;animation-delay:5s;">🌸</span>
+    <span style="left:60%;animation-delay:1s;">🌸</span>
+    <span style="left:75%;animation-delay:4s;">🌸</span>
+    <span style="left:90%;animation-delay:7s;">🌸</span>
+    
+</div>
+
+<!-- MESSAGE -->
+
+<div class="container">
+    <div id="message" class="message"></div>
+</div>
+
+<script>
+
+const musicBtn = document.getElementById("musicBtn");
+const musicIcon = document.getElementById("musicIcon");
+const bgMusic = document.getElementById("bgMusic");
+
+const introScreen = document.getElementById("introScreen");
+const startBtn = document.getElementById("startBtn");
+
+let isPlaying = false;
+
+
+// This is just for Testing
+// other message is on the notes.txt
+const messages = [
+
+"Hello my Wifee hehe 𓍢ִ໋🌷͙֒",
+
+"Wait...",
+
+"Before you continue...",
+
+"Are you sure you're ready for this? 👀",
+
+"Because I have something important to tell you...",
+
+"Question first.",
+
+"Who's the prettiest wife in the world?",
+
+"Think carefully...",
+
+"Wrong.",
+
+"It's you.",
+
+"Always you.  🎀𓍢ִ໋🌷͙֒🩰",
+
+"Okay okay...",
+
+"Serious na.",
+
+"I made this little surprise just for you.",
+
+"Because there are things I never get tired of telling you.",
+
+"Thank you for being my safe place.",
+
+"My best friend.",
+
+"My favorite notification.",
+
+"My favorite person.",
+
+"The one I want to share every ordinary day with.",
+
+"You make simple moments feel special.",
+
+"You make difficult days feel lighter.",
+
+"And somehow...",
+
+"You make life feel warmer.",
+
+"If I could choose again...",
+
+"I would still choose you.",
+
+"Every single time.",
+
+"Without hesitation.",
+
+"Without doubt.",
+
+"Just you. 🎀𓍢ִ໋🌷",
+
+"You are my home.",
+
+"My comfort.",
+
+"My favorite person.",
+
+"The one I want to spend forever with.",
+
+"And that's why...",
+
+"I need to confess something...",
+
+"Sometimes...",
+
+"When you're sleeping...",
+
+"I stare at you.",
+
+"Not because I'm being romantic.",
+
+"I'm checking if you're still angry at me. 😭",
+
+"Because honestly...",
+
+"I can never tell. 😂",
+
+"Or maybe...",
+
+"I have one complaint.",
+
+"You stole something from me.",
+
+"My heart? ✗",
+
+"My side of the bed? 😌",
+
+"Only when you come over...",
+
+"and then you say it's too hot 😭",
+
+"So I end up respecting your 'no cuddle zone' policy 😂",
+
+"But if I'm being honest...",
+
+"You can have the bed.",
+
+"You can have my fries.",
+
+"You can have everything.",
+
+"Because having you...",
+
+"Is the best thing that ever happened to me. 🎀𓍢ִ໋🌷",
+
+"So this wasn't really a confession.",
+
+"It was a reminder.",
+
+"That no matter how many days pass...",
+
+"No matter how many silly arguments we have...",
+
+"I love you more than words can explain, Always and forever. 🤍",
+
+"Happy 6th Monthsaryy Babyy",
+  
+"- Your Bechangg 𓍢ִ໋🌷͙֒ 🎀💗ྀི "
+];
+
+const text = document.getElementById("message");
+
+let index = 0;
+
+const songDuration = 237;
+
+const messageDuration =
+((songDuration * 1000) - (700 * messages.length))
+/ messages.length;
+
+function showMessage(){
+
+    text.classList.remove("show");
+
+    setTimeout(() => {
+
+        text.innerHTML = messages[index];
+
+        if(index >= messages.length - 3){
+            text.classList.add("final");
+        }
+
+        text.classList.add("show");
+
+        index++;
+
+        if(index < messages.length){
+
+            setTimeout(showMessage, messageDuration);
+
+        }
+
+    },700);
+
+}
+
+startBtn.addEventListener("click", () => {
+
+    bgMusic.volume = 0;
+    bgMusic.play();
+
+    isPlaying = true;
+
+    let fade = setInterval(() => {
+        if(bgMusic.volume < 0.7){
+            bgMusic.volume += 0.05;
+        }else{
+            clearInterval(fade);
+        }
+    }, 200);
+
+    musicBtn.classList.add("active");
+
+    introScreen.classList.add("hide");
+
+    setTimeout(() => {
+        showMessage();
+    },800);
+
+});
+
+musicBtn.addEventListener("click", () => {
+
+    if(!isPlaying){
+
+        bgMusic.play();
+
+        musicBtn.classList.add("active");
+
+        isPlaying = true;
+
+    }else{
+
+        bgMusic.pause();
+
+        musicBtn.classList.remove("active");
+
+        isPlaying = false;
+    }
+
+});
+
+</script>
+
+</body>
+</html>
