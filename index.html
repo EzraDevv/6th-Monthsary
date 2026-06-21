@@ -378,6 +378,12 @@ const text = document.getElementById("message");
 
 let index = 0;
 
+const songDuration = 237; // 3:57
+
+const messageDuration =
+    ((songDuration * 1000) - (700 * messages.length))
+    / messages.length;
+
 function showMessage() {
 
     text.classList.remove("show");
@@ -396,17 +402,7 @@ function showMessage() {
 
         if(index < messages.length){
 
-            let duration = 2200;
-
-            if(
-                messages[index - 1].includes("confess") ||
-                messages[index - 1].includes("Sometimes") ||
-                messages[index - 1].includes("stare at you") ||
-                messages[index - 1].includes("complaint") ||
-                messages[index - 1].includes("monthsaryy") 
-            ){
-                duration = 5200;
-            }
+            let duration = messageDuration;
 
             setTimeout(showMessage, duration);
         }
