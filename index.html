@@ -67,6 +67,21 @@
       height: 100%;
       pointer-events: none;
       z-index: 1;
+      contain: layout paint;
+    }
+
+    /* PERF: filter:blur() on an animated element is one of the more expensive
+       things a low-end GPU has to keep re-rasterizing every frame. Three rays
+       running this forever is unnecessary on small/likely-weaker screens, so
+       trim it down there. */
+    @media (max-width: 600px) {
+      .light-ray {
+        filter: blur(10px);
+      }
+
+      .light-ray.r3 {
+        display: none;
+      }
     }
 
     .light-ray {
@@ -79,6 +94,7 @@
       filter: blur(18px);
       opacity: 0.55;
       animation: raySway 14s ease-in-out infinite;
+      will-change: transform;
     }
 
     .light-ray.r2 {
@@ -112,9 +128,15 @@
     }
 
     @media (prefers-reduced-motion:reduce) {
-      * {
-        animation-duration: 0.001s !important;
-        animation-iteration-count: 1 !important;
+
+      /* PERF/BUG FIX: forcing duration to ~0 + iteration-count:1 still RUNS
+         every animation once (including infinite ones), just compressed
+         into a single visible snap/flash. That's not what reduced-motion
+         means. Disabling animation outright is both correct and cheaper. */
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
         transition-duration: 0.2s !important;
       }
     }
@@ -310,18 +332,24 @@
       left: 6%;
       right: 6%;
       bottom: 8%;
-      height: 0;
+      height: 92%;
       background: linear-gradient(180deg, #FFFDF8, #FBF2E4);
       border-radius: 10px 10px 4px 4px;
       box-shadow: 0 -4px 18px rgba(120, 80, 50, 0.15);
       z-index: 4;
-      transition: height 1.7s cubic-bezier(.2, .7, .2, 1), transform 1.7s cubic-bezier(.2, .7, .2, 1);
-      transform: translateY(0);
+      /* PERF FIX: was animating `height` (0 -> 92%), which is a layout
+         property and forces reflow on every tick of a 1.7s transition.
+         Height is now fixed and the same "grows out of the envelope" look
+         is achieved with transform:scaleY anchored at the bottom edge,
+         which the compositor can run without touching layout at all. */
+      transform-origin: bottom;
+      transform: scaleY(0) translateY(0%);
+      transition: transform 1.7s cubic-bezier(.2, .7, .2, 1);
+      will-change: transform;
     }
 
     #envelope-wrap.opened .letter-peek {
-      height: 92%;
-      transform: translateY(-14%);
+      transform: scaleY(1) translateY(-14%);
     }
 
     /* Falling hearts */
@@ -355,6 +383,13 @@
       background: radial-gradient(circle, #fff7e0, #f3cf8e 60%, transparent 100%);
       pointer-events: none;
       z-index: 3;
+      opacity: 0.8;
+      transition: opacity 0.6s linear;
+      will-change: opacity;
+    }
+
+    .spark.fade {
+      opacity: 0;
     }
 
     /* Letter scene */
@@ -552,6 +587,7 @@
       pointer-events: none;
       cursor: grab;
       touch-action: none;
+      contain: layout paint;
     }
 
     .music-player.visible {
@@ -790,15 +826,21 @@
       border: 1px solid rgba(255, 255, 255, 0.5);
       cursor: pointer;
       opacity: 0.7;
-      transition: opacity 0.2s ease;
+      visibility: visible;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
     }
 
     .skip-hint:hover {
       opacity: 1;
     }
 
+    /* FADE FIX: was `display:none`, which removes the element from
+       rendering instantly and cuts off any in-progress opacity transition.
+       opacity + visibility lets it fade smoothly both in and out. */
     .skip-hint.hidden {
-      display: none;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     /* Paper screen */
@@ -810,8 +852,14 @@
       opacity: 0;
       background: radial-gradient(circle, rgba(255, 248, 238, 0.95), rgba(60, 40, 20, 0.5) 80%);
       backdrop-filter: blur(0px);
-      transition: opacity 0.8s ease, backdrop-filter 0.8s ease, transform 0.8s ease;
+      /* PERF FIX: backdrop-filter removed from the transition list. Animating
+         the blur radius itself forces a re-sample of everything behind this
+         layer on every frame; since this element also fades via opacity at
+         the same time, you never actually see a "growing blur" anyway —
+         opacity carries the visible effect, so the blur can just snap. */
+      transition: opacity 0.8s ease, transform 0.8s ease;
       transform: scale(0.95);
+      contain: layout paint;
     }
 
     #paper-screen.active {
@@ -962,6 +1010,7 @@
       inset: 0;
       perspective: 1200px;
       overflow: hidden;
+      contain: layout paint;
     }
 
     /* Cozy sparkle transition overlay — warm cream + rose-gold diamond/star shapes
@@ -1036,12 +1085,12 @@
       transition: opacity 1.4s ease, transform 2s cubic-bezier(.2, 0, .4, 1);
     }
 
-    /* Memory cards - NO FLIPPING, just zoom toward viewer */
+    /* Memory cards - cozy, cartoonish pop-in + float away (no flipping) */
     .memory-card {
       position: absolute;
-      border-radius: 16px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 10px 30px -5px rgba(60, 40, 20, 0.4);
+      box-shadow: 0 14px 26px -8px rgba(120, 80, 50, 0.35), 0 0 0 5px rgba(255, 253, 248, 0.95);
       opacity: 0;
       transform: scale(0.1);
       transition: none;
@@ -1056,28 +1105,46 @@
     }
 
     .memory-card.flying {
-      animation: memoryFly 3.5s ease-out forwards;
+      animation: memoryFlyCozy 3.8s cubic-bezier(.32, 1.3, .44, 1) forwards;
     }
 
-    @keyframes memoryFly {
+    /* Cozy/cartoonish reveal: a bouncy squash-and-stretch pop-in (instead of
+       a flat zoom toward the camera), a gentle sticker-like sway while it
+       lingers, then a soft upward drift as it fades — like a little balloon
+       floating off. Each card's --rot custom property (randomized in JS)
+       gives it its own resting tilt so the cards feel hand-placed rather
+       than uniform. */
+    @keyframes memoryFlyCozy {
       0% {
         opacity: 0;
-        transform: scale(0.1);
+        transform: scale(0.15) rotate(calc(var(--rot, 0deg) - 10deg)) translateY(20px);
       }
 
-      15% {
+      14% {
         opacity: 1;
-        transform: scale(0.4);
+        transform: scale(1.18) rotate(calc(var(--rot, 0deg) + 6deg)) translateY(-6px);
       }
 
-      50% {
+      24% {
+        transform: scale(0.92) rotate(calc(var(--rot, 0deg) - 3deg)) translateY(2px);
+      }
+
+      34% {
+        transform: scale(1.06) rotate(calc(var(--rot, 0deg) + 2deg)) translateY(-3px);
+      }
+
+      46% {
+        transform: scale(1) rotate(var(--rot, 0deg)) translateY(0);
+      }
+
+      72% {
         opacity: 1;
-        transform: scale(0.7);
+        transform: scale(1.03) rotate(calc(var(--rot, 0deg) + 3deg)) translateY(-8px);
       }
 
       100% {
         opacity: 0;
-        transform: scale(1.8);
+        transform: scale(0.88) rotate(calc(var(--rot, 0deg) - 5deg)) translateY(-46px);
       }
     }
 
@@ -1097,18 +1164,24 @@
       font-size: 13px;
       cursor: pointer;
       box-shadow: 0 8px 20px rgba(169, 128, 95, 0.35);
-      transition: transform 0.25s ease, opacity 0.5s ease;
-      display: none;
+      transition: transform 0.25s ease, opacity 0.5s ease, visibility 0.5s ease;
+      visibility: hidden;
       opacity: 0;
+      pointer-events: none;
     }
 
     .memories-back:hover {
       transform: translateX(-50%) translateY(-2px);
     }
 
+    /* FADE FIX: was `display:none`, which kills any in-progress opacity
+       transition the instant the .show class is removed — so it faded in
+       fine but disappeared instantly instead of fading out. visibility
+       lets the 0.5s opacity transition actually complete both ways. */
     .memories-back.show {
-      display: block;
+      visibility: visible;
       opacity: 1;
+      pointer-events: auto;
     }
 
     /* Gift scene */
@@ -1295,6 +1368,16 @@
       color: var(--ink-soft);
       text-align: center;
       animation: gentlePulse 2.4s ease-in-out infinite;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Hides "Tap the heart..." the moment the heart starts vibrating.
+       animation:none stops the infinite pulse so the opacity transition
+       (rather than the keyframe) is what's visibly driving the fade-out. */
+    .final-prompt.hide {
+      animation: none;
+      opacity: 0;
+      pointer-events: none;
     }
 
     /* Heart click sequence: vibrate -> expand -> explode (fades + scatters) */
@@ -1438,6 +1521,7 @@
       z-index: 200;
       object-fit: contain;
       animation: heartSpawn 2.5s ease-out forwards;
+      will-change: transform, opacity;
     }
 
     @keyframes heartSpawn {
@@ -1643,6 +1727,15 @@
         bottom: 10px;
         padding: 6px 10px 6px 6px;
         gap: 5px;
+        /* PERF FIX: this player stays visible (z-index 9999, over every
+           scene) for almost the entire session once shown. A continuously
+           active backdrop-filter means every animation underneath it
+           (petals, screen shake, flying memory cards, the heart burst) has
+           to be re-composited through a blur on every frame. Small/likely
+           lower-powered screens get a flat translucent background instead. */
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255, 250, 240, 0.92);
       }
 
       .player-info {
@@ -1812,7 +1905,7 @@
     <div id="final-scene">
       <img class="final-heart" id="finalHeart" src="assets/image/62c6e7528aac2835a0a2dae848223eb3.png" alt="heart"
         role="button" tabindex="0">
-      <div class="final-prompt">Tap the heart... 💖</div>
+      <div class="final-prompt" id="finalPrompt">Tap the heart... 💖</div>
     </div>
 
     <!-- RING REVEAL -->
@@ -1883,33 +1976,39 @@
           s.style.height = sz + 'px';
           s.style.left = (e.clientX + Math.random() * 16 - 8) + 'px';
           s.style.top = (e.clientY + Math.random() * 16 - 8) + 'px';
-          s.style.opacity = '0.8';
           document.body.appendChild(s);
-          let op = 0.8;
-          const f = setInterval(() => {
-            op -= 0.08;
-            s.style.opacity = op;
-            if (op <= 0) {
-              clearInterval(f);
-              s.remove();
-            }
-          }, 60);
+          // PERF FIX: this used to be a per-spark setInterval(60ms) loop
+          // manually decrementing opacity on the main thread — every spark
+          // got its own timer untied to the frame rate. A CSS transition
+          // does the identical fade on the compositor thread for free, and
+          // cleans itself up via transitionend instead of a counter.
+          requestAnimationFrame(() => s.classList.add('fade'));
+          s.addEventListener('transitionend', () => s.remove(), { once: true });
         }
       });
 
       const KISS = 'assets/image/kiss.png';
+      let activeKisses = 0;
+      const MAX_KISSES = 8; // every click anywhere spawns one of these; cap concurrency for low-end devices
 
       function kissBurstAt(x, y) {
-        if (rm) return;
+        if (rm || activeKisses >= MAX_KISSES) return;
+        activeKisses++;
         const k = document.createElement('img');
         k.className = 'kiss-burst';
         k.src = KISS;
         k.alt = '';
-        k.onerror = () => k.remove();
+        k.onerror = () => {
+          activeKisses--;
+          k.remove();
+        };
         k.style.left = (x - 18) + 'px';
         k.style.top = (y - 18) + 'px';
         document.body.appendChild(k);
-        setTimeout(() => k.remove(), 1250);
+        setTimeout(() => {
+          activeKisses--;
+          k.remove();
+        }, 1250);
       }
 
       /* Audio */
@@ -1935,16 +2034,30 @@
       const DEFAULT_VOLUME = 0.5;
       audio.volume = DEFAULT_VOLUME;
 
+      // BUG FIX: fadeInVolume() previously had no way to tell startM() that
+      // a deliberate fade-from-silence was in progress. startM()'s own
+      // zero-volume safety guard ran synchronously and snapped audio.volume
+      // back up to 0.5 BEFORE fadeInVolume's rAF loop ever got a chance to
+      // run — so "from" and "target" both ended up 0.5 and nothing actually
+      // faded; the music just jumped straight to 50% instantly. This flag
+      // lets the guard step aside while a real ramp is in flight.
+      let isFadingIn = false;
+
       function fadeInVolume(target) {
         target = (typeof target === 'number') ? target : (volSlider.value / 100);
         const dur = 1600,
           start = performance.now(),
           from = audio.volume;
+        isFadingIn = true;
 
         function step(now) {
           const t = Math.min(1, (now - start) / dur);
           audio.volume = from + (target - from) * t;
-          if (t < 1) requestAnimationFrame(step);
+          if (t < 1) {
+            requestAnimationFrame(step);
+          } else {
+            isFadingIn = false;
+          }
         }
         requestAnimationFrame(step);
       }
@@ -1992,9 +2105,10 @@
       function startM() {
         // FIX: make sure volume is never accidentally left at 0 (e.g. if browser
         // autoplay policies, restoring from a previous tab state, or any future
-        // code path resets it). Always (re)apply the slider's current value, with
-        // the 50% default as the floor the very first time the track starts.
-        if (audio.volume === 0) {
+        // code path resets it) — UNLESS fadeInVolume() is actively ramping it up
+        // right now, in which case forcing it here would instantly overwrite
+        // the ramp and skip the fade entirely.
+        if (!isFadingIn && audio.volume === 0) {
           audio.volume = volSlider.value > 0 ? volSlider.value / 100 : DEFAULT_VOLUME;
         }
         audio.play().catch(() => {
@@ -2119,12 +2233,14 @@
           requestAnimationFrame(() => letS.classList.add('visible'));
           mp.classList.add('visible');
           skip.classList.remove('hidden');
-          // FIX: explicitly ensure the 50% default is in place right as the letter
-          // opens and music starts, then fade in smoothly from there rather than
-          // from silence — this is the moment the bug was most noticeable.
+          // FIX: start the fade-in ramp BEFORE calling startM(). fadeInVolume()
+          // sets isFadingIn = true synchronously and captures the current
+          // (silent) volume as its starting point; startM()'s safety guard
+          // then sees isFadingIn and steps aside, so the ramp actually plays
+          // out over ~1.6s instead of being instantly overwritten to full.
           audio.volume = 0;
-          startM();
           fadeInVolume(volSlider.value / 100 || DEFAULT_VOLUME);
+          startM();
           runSeq();
         }, 3000);
       }
@@ -2405,9 +2521,13 @@
               const w = 80 + Math.random() * 100;
               c.style.width = w + 'px';
               c.style.height = w + 'px';
+              // Cozy/cartoonish touch: a small random resting tilt per card
+              // (read by the memoryFlyCozy keyframes via var(--rot)) so they
+              // feel hand-placed like little stickers instead of uniform.
+              c.style.setProperty('--rot', (Math.random() * 16 - 8) + 'deg');
               cv.appendChild(c);
               requestAnimationFrame(() => c.classList.add('flying'));
-              setTimeout(() => c.remove(), 4000);
+              setTimeout(() => c.remove(), 4200);
             }, d);
             d += 350;
           }
@@ -2486,6 +2606,12 @@
         // free to run immediately instead of being silently blocked.
         heartEl.style.animation = '';
 
+        // Hide "Tap the heart..." the instant the sequence kicks off — it's
+        // instructional text that no longer makes sense once the heart is
+        // already vibrating/about to explode. .hide turns off its own
+        // pulse animation so the opacity transition can actually be seen.
+        document.getElementById('finalPrompt').classList.add('hide');
+
         // 1) VIBRATE — quick nervous shake before anything else happens.
         heartEl.classList.add('fh-vibrate');
 
@@ -2516,8 +2642,18 @@
 
         function spawnHeartBurst() {
           const cx = window.innerWidth / 2,
-            cy = window.innerHeight / 2,
-            cnt = 120;
+            cy = window.innerHeight / 2;
+          // PERF FIX: 120 simultaneously-animating <img> elements (each one
+          // very likely promoted to its own GPU compositor layer) was the
+          // single heaviest moment in the entire page — right at the climax,
+          // the worst place for a frame drop. Scale the count down on
+          // smaller/likely lower-powered devices, and build every node into
+          // a DocumentFragment so the DOM takes ONE append hit instead of
+          // 120 separate reflows.
+          const lowPower = window.matchMedia('(max-width: 768px)').matches ||
+            (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+          const cnt = lowPower ? 45 : 80;
+          const frag = document.createDocumentFragment();
           for (let i = 0; i < cnt; i++) {
             const h = document.createElement('img');
             h.className = 'spawned-heart';
@@ -2534,15 +2670,21 @@
               delay = Math.random() * 1;
             h.style.animationDuration = dur + 's';
             h.style.animationDelay = delay + 's';
-            document.body.appendChild(h);
+            frag.appendChild(h);
             setTimeout(() => h.remove(), (dur + delay) * 1000 + 50);
           }
+          document.body.appendChild(frag);
         }
 
         function runZoomTransition() {
           // 5) ZOOM-IN + FADE-OUT veil covers the (now-empty) final scene...
           ps.classList.add('active');
-          ps.style.transition = 'opacity 0.7s ease, transform 0.7s ease, backdrop-filter 0.7s ease';
+          // PERF FIX: no longer animating backdrop-filter itself (it's the
+          // most expensive thing to transition); opacity + transform alone
+          // already carry the visible "veil" effect, and the blur radius
+          // now just snaps via the CSS rule instead of re-rasterizing every
+          // frame for 0.7s.
+          ps.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
           ps.style.transform = 'scale(0.85)';
           requestAnimationFrame(() => {
             ps.style.transform = 'scale(1.25)';
@@ -2606,6 +2748,8 @@
         document.getElementById('final-scene').style.transform = '';
         document.getElementById('final-scene').style.opacity = '';
         document.getElementById('final-scene').style.transition = '';
+        // Bring "Tap the heart..." back with a fade for the retry.
+        document.getElementById('finalPrompt').classList.remove('hide');
       });
       document.getElementById('resultBack').addEventListener('click', () => {
         fadeBackToChoices(document.getElementById('result-scene'));
